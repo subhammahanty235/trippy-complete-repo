@@ -1,0 +1,41 @@
+Generate a New Migration File
+npx sequelize-cli migration:generate --name migration-name
+
+Located in the migrations folder.
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    // Add your migration code here
+  },
+  down: async (queryInterface, Sequelize) => {
+    // Add the code to revert the migration here
+  },
+};
+
+
+Define Your Changes
+
+Add a Column:
+
+up: async (queryInterface, Sequelize) => {
+  await queryInterface.addColumn('tableName', 'columnName', {
+    type: Sequelize.DataTypes.STRING, // Adjust type as needed
+    allowNull: false, // Set constraints as required
+  });
+},
+down: async (queryInterface, Sequelize) => {
+  await queryInterface.removeColumn('tableName', 'columnName');
+},
+
+Run the Migration
+npx sequelize-cli db:migrate
+
+
+-------------------------------------------------------
+Rollback the Migration (Optional)           
+Undo the last migration:
+npx sequelize-cli db:migrate:undo
+Undo all migrations:
+npx sequelize-cli db:migrate:undo:all
+-------------------------------------------------------
