@@ -2,11 +2,13 @@ const { checkIfEligibleToCreateTrip } = require('../helpers/checkEligibilityHelp
 const db = require('../models');
 const { Op } = require('sequelize');
 const { generateTripId } = require('../utils/generateTripId.util');
+const { filterTrips } = require('../helpers/filterTrips');
 const Trip = db.Trip;
 const TripUserData = db.TripUserData;
 const PreLoggedUser = db.PreLoggedUser;
 const User = db.User
 const TripUserRequest = db.TripUserRequest;
+const Connections = db.Connections;
 
 exports.createNewTrip = async (req, res) => {
     try {
@@ -370,5 +372,110 @@ exports.rejectTripJoinRequest = async (req, res) => {
 
 }
 
+exports.getAllTripsOfUser = async(req,res) => {
+    try {
+        const userId = req.user.id;
+        const trips = await TripUserData.findAll({
+            where:{
+                userId:userId,
+            },
+            include:[
+            {
+                model:Trip,
+                as:'trip'
+            }
+            ]
+        })
+        let tripObj = filterTrips(trips)
+        return res.status(201).json({success:true, message:"Trips fetched successfully", trips:tripObj})
 
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
 
+exports.addConnectionToTrip = async (req, res) => {
+    try {
+        // Input validation
+        const { connectionId } = req.body;
+        const tripId = req.params.tripId;
+
+        if (!connectionId || !tripId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Connection ID and Trip ID are required'
+            });
+        }
+
+        // Fetch the connection details
+        const connectionDetails = await Connections.findOne({
+            where: {
+                connectionId: connectionId,
+                // isDeleted: false
+            }
+        });
+
+        if (!connectionDetails) {
+            return res.status(404).json({
+                success: false,
+                message: 'Connection not found or has been deleted'
+            });
+        }
+
+        const connectedUserId = connectionDetails.connectionUserId;
+
+        // Check if user already exists in the trip
+        const existingTripUser = await TripUserData.findOne({
+            where: {
+                tripId: tripId,
+                userId: connectedUserId
+            }
+        });
+
+        if (existingTripUser) {
+            return res.status(409).json({
+                success: false,
+                message: 'User is already added to this trip'
+            });
+        }
+
+        await TripUserData.create({
+            userId: connectedUserId,
+            tripId: tripId,
+            isPlcUser: connectionDetails.isPlcUser || false,
+            joinedVia: 1, // Assuming 1 represents 'connection'
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: 'Connection successfully added to trip'
+        });
+
+    } catch (error) {
+        // Log the error for debugging
+        // logger.error('Error in addConnectionToTrip:', {
+        //     error: error.message,
+        //     stack: error.stack,
+        //     connectionId: req.body.connectionId,
+        //     tripId: req.params.tripId
+        // });
+
+        // Check if it's a validation error
+        
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+
+        // // Return generic error for other cases
+        // return res.status(500).json({
+        //     success: false,
+        //     message: 'An error occurred while adding connection to trip'
+        // });
+    }
+};

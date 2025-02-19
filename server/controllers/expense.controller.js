@@ -7,13 +7,13 @@ exports.addNewExpense = async (req, res) => {
 
     try {
         const userId = req.user.id;
-        const { title, description, amount, splitPattern,tripId, addedMembers, paymentMethod } = req.body;
+        const { title, description, amount, splitPattern, tripId, addedMembers, paymentMethod } = req.body;
 
         const newexpense = await TripExpense.create({
             title: title,
             description: description,
             tripId: tripId,
-            userId:userId,
+            userId: userId,
             totalExpanse: amount,
             paymentMethod: paymentMethod,
             splitPattern: splitPattern,
@@ -25,7 +25,7 @@ exports.addNewExpense = async (req, res) => {
         let expenseSplitIds = [];
         for (let expense of addedMembers) {
             let expsaved = await ExpenseSplit.create({
-                tripId: tripId, 
+                tripId: tripId,
                 paidBy: userId,
                 amount: expense.amount,
                 userId: expense.userId,
@@ -36,12 +36,12 @@ exports.addNewExpense = async (req, res) => {
 
             expenseSplitIds.push(expsaved.id)
         }
-   
+
         // if(expenseSplitIds.length === addedMembers.length){
 
         // }
 
-        res.status(200).json({success:true, message:"expense added " , expense:newexpense})
+        res.status(200).json({ success: true, message: "expense added ", expense: newexpense })
 
     } catch (error) {
         console.log(error)
@@ -49,25 +49,25 @@ exports.addNewExpense = async (req, res) => {
     }
 }
 
-exports.getTotalTripExpense = async(req,res) => {
+exports.getTotalTripExpense = async (req, res) => {
     try {
-        const  tripId  = req.params.tripCode;
+        const tripId = req.params.tripCode;
         console.log(req.params)
-        const selectedTrip = await Trip.findOne({where:{tripUniqueCode:tripId , isDeleted:false}});
+        const selectedTrip = await Trip.findOne({ where: { tripUniqueCode: tripId, isDeleted: false } });
         console.log(selectedTrip)
         const tripExpenses = await TripExpense.findAll({
-            where:{
-                tripId:selectedTrip.id
+            where: {
+                tripId: selectedTrip.id
             }
         })
         let totalCost = 0;
-        if(tripExpenses.length > 0){
+        if (tripExpenses.length > 0) {
             tripExpenses.map((exp) => {
                 totalCost += parseInt(exp['dataValues'].totalExpanse);
             })
         }
-        
-        res.status(200).json({success:true , amount: totalCost});
+
+        res.status(200).json({ success: true, amount: totalCost });
     } catch (error) {
         console.log(error)
         res.status(500).send(error)
@@ -75,35 +75,40 @@ exports.getTotalTripExpense = async(req,res) => {
 }
 
 
-exports.fetchAllLendingsOfUserTripBased = async(req,res)=>{
+exports.fetchAllLendingsOfUserTripBased = async (req, res) => {
     const userId = req.user.id;
     const tripId = req.params.tripId;
     console.log(userId)
     try {
         const lendings = await ExpenseSplit.findAll({
-            where:{tripId:tripId , userId:userId , paymentStatus:false},
-            attributes:['id' , 'amount' ],
-            include:[
+            where: { tripId: tripId, userId: userId, paymentStatus: false },
+            attributes: ['id', 'amount'],
+            include: [
                 {
-                    model:db.User,
-                    as:'lender',
-                    required:true,
-                    attributes:['id' , 'name' , 'profilePic']
+                    model: db.Connection,
+                    as: "connection",
+                    include: [
+                        {
+                            model: db.User,
+                            as: "connectedUser", // This fetches the user details from the connectionUserId
+                            attributes: ["id", "name", "profilePic"]
+                        }
+                    ]
                 },
                 {
-                    model:db.TripExpense,
-                    as:'expense',
-                    required:true,
-                    attributes:['id' , 'title']
+                    model: db.TripExpense,
+                    as: 'expense',
+                    required: true,
+                    attributes: ['id', 'title']
                 }
             ]
-        
+
         })
         console.log(lendings)
-        if(!lendings){
-            return res.status(200).json({success:true , message:"No lendings found" , lendings:[]})
+        if (!lendings) {
+            return res.status(200).json({ success: true, message: "No lendings found", lendings: [] })
         }
-        return res.status(200).json({success:true , message:"lendings found" , lendings:lendings})
+        return res.status(200).json({ success: true, message: "lendings found", lendings: lendings })
 
 
     } catch (error) {

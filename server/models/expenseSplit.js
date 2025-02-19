@@ -16,7 +16,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
         },
         //id of the user who is tagged in the expanse
-        userId:{
+        //modifying it to store connectionId , so streamline the complete process and make it more scalable
+        // userId:{
+        //     type: DataTypes.INTEGER,
+        // },
+        connectionId:{
             type: DataTypes.INTEGER,
         },
         paymentStatus:{

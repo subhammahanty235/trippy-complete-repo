@@ -2,6 +2,7 @@ const db = require('../models')
 const TripExpense = db.TripExpense;
 const ExpenseSplit = db.ExpenseSplit
 const PaymentMethodUser = db.PaymentMethodUser
+const LendingPayment = db.LendingPayment
 const Trip = db.Trip
 
 exports.addPaymentMethodOfUser = async (req, res) => {
@@ -82,13 +83,13 @@ exports.makeNonComfirmedPayment = async (req, res) => {
 
         //check payment status from lending payments / either confirmation pending/completed
         const {checkPayment , checkpaymentMethod} =await Promise.all([
-            lendingPaymentModel.findOne({
+            LendingPayment.findOne({
                 where:{
                     expenseSplitId:splitId,
                     paymentConfirmation: { [Op.in]: [0, 1] }
                 }
             }),
-            paymentMethodUser.findOne({
+            PaymentMethodUser.findOne({
                 where:{
                     userId:userId,
                     paymentMethodKey:paymentMethod,
@@ -104,7 +105,7 @@ exports.makeNonComfirmedPayment = async (req, res) => {
            return res.status(400).json({success:false, message:"Payment Method is not acceptable to user"})
         }
 
-        const newpayment = await lendingPaymentModel.create({
+        const newpayment = await LendingPayment.create({
             expenseSplitId:splitId,
             paymentDate:new Date(),
             paymentMethod:paymentMethod,

@@ -53,6 +53,7 @@ db.Sequelize = Sequelize;
 
 // db.Connections.belongsTo(db.User, { foreignKey: 'userId', as: 'initiator' }); // User who initiates the connection
 db.Connections.belongsTo(db.User, { foreignKey: 'connectionUserId', as: 'connectedUser' }); // User who is being connected to
+
 // db.User.hasMany(db.Connections, { foreignKey: 'userId', sourceKey: 'id', as: 'connections' });
 db.User.hasMany(db.Connections, { foreignKey: 'connectionUserId', sourceKey: 'id', as: 'connectedUsers' });
 
@@ -65,11 +66,15 @@ db.User.hasMany(db.TripUserData, {foreignKey:"userId", sourceKey:'id', as:'peopl
 db.Trip.hasMany(db.TripUserData, {foreignKey: 'tripId', as: 'tripUsers' });
 db.TripUserData.belongsTo(db.Trip, {foreignKey: 'tripId', as: 'trip'});
 
-// ExpenseSplit belongs to User
-db.ExpenseSplit.belongsTo(db.User, { foreignKey: "paidBy", targetKey: "id", as: "lender" });
+// ExpenseSplit belongs to Connection
+db.ExpenseSplit.belongsTo(db.Connections, { foreignKey: "connectionId", as: "connection" });
 
-// User has many ExpenseSplit
-db.User.hasMany(db.ExpenseSplit, { foreignKey: "paidBy", sourceKey: "id", as: "lender" });
+// Connection belongs to User (connected user)
+// db.Connections.belongsTo(db.User, { foreignKey: "connectionUserId", as: "connectedUser" });
+
+// User has many Connections
+db.User.hasMany(db.Connections, {foreignKey: "connectionUserId", as: "connections"});
+
 
 // ExpenseSplit belongs to Expense
 db.ExpenseSplit.belongsTo(db.TripExpense, { foreignKey: "expenseId", targetKey: "id", as: "expense" });

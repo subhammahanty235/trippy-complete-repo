@@ -19,11 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         isBlocked:{
             type:DataTypes.BOOLEAN,
-            default:false,
+            defaultValue:false,
         },
         isDeleted:{
             type:DataTypes.BOOLEAN,
-            default:false
+            defaultValue:false
         },
         createdAt: {
             allowNull: false,

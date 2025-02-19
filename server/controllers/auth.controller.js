@@ -1,6 +1,7 @@
 const db = require('../models')
 const User = db.User
 const TempOTP = db.TempOTP
+const PreLoggedUser = db.PreLoggedUser;
 const { encryptData } = require('../utils/dataSecurity.util');
 const { generateOTP } = require('../utils/generateOTP.util');
 const jwt = require("jsonwebtoken");
@@ -58,6 +59,7 @@ exports.validateOTPAndCreateUser = async (req, res) => {
     if (checkOtp.otpCode === recievedOtp) {
         await TempOTP.destroy({ where: { emailId: encryptEmail } });
         try {
+
             const newUser = await User.create({
                 name: name,
                 emailId: emailId,
@@ -68,9 +70,15 @@ exports.validateOTPAndCreateUser = async (req, res) => {
                     id: newUser.id
                 }
             }
-            const token = jwt.sign(data, "jwt67689797979");
-            console.log("User created")
-            return res.status(201).json({ success: true,token:token, message: "OTP verified and user created" });
+
+            //check if any plc user exists with the email id or not
+            const PLCUserDetails = await PreLoggedUser.findOne({where:{
+                emailId:emailId,
+                isAccountCreated:false,
+            }})
+            const isPlcExists = !PLCUserDetails ? false: true;
+            const token = jwt.sign(data, process.env.JWT_SECRET);
+            return res.status(201).json({ success: true,token:token, isPlcUserExists: isPlcExists, message: "OTP verified and user created" });
 
         } catch (error) {
             console.log(error)
@@ -138,7 +146,7 @@ exports.validateOTPForLogin = async (req, res) => {
                         id: user.id
                     }
                 }
-                const token = jwt.sign(data, "jwt67689797979");
+                const token = jwt.sign(data, process.env.JWT_SECRET);
                 return res.status(201).json({ success: true, token: token, message: "OTP verified and user found" });
             }
 
