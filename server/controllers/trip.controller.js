@@ -20,12 +20,10 @@ exports.createNewTrip = async (req, res) => {
             startdate,
             enddate,
             addedpeople,
-            creator,
             defaultCurrency
         } = req.body;
-
+        const creator = req.user.id
         if ((!tripname || !tripdescription || !startdate || !addedpeople)) {
-
             return res.status(200).json({ success: false, message: "Please add all the required inputs", fields: { tripname, tripdescription, startdate, addedpeople } })
         }
 
@@ -79,6 +77,7 @@ exports.createNewTrip = async (req, res) => {
 }
 
 exports.getTripByIdWithUsers = async (req, res) => {
+    console.log("Here's i am fetching the users and trip ------------------------->")
     try {
         const { tripId } = req.body;
         let trip = await Trip.findOne({
@@ -402,6 +401,8 @@ exports.addConnectionToTrip = async (req, res) => {
         // Input validation
         const { connectionId } = req.body;
         const tripId = req.params.tripId;
+        console.log(connectionId)
+        console.log(tripId)
 
         if (!connectionId || !tripId) {
             return res.status(400).json({
@@ -446,7 +447,7 @@ exports.addConnectionToTrip = async (req, res) => {
             userId: connectedUserId,
             tripId: tripId,
             isPlcUser: connectionDetails.isPlcUser || false,
-            joinedVia: 1, // Assuming 1 represents 'connection'
+            joinedVia: 2,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -466,7 +467,7 @@ exports.addConnectionToTrip = async (req, res) => {
         // });
 
         // Check if it's a validation error
-        
+            console.log(error)
             return res.status(400).json({
                 success: false,
                 message: error.message

@@ -54,7 +54,7 @@ exports.getTotalTripExpense = async (req, res) => {
         const tripId = req.params.tripCode;
         console.log(req.params)
         const selectedTrip = await Trip.findOne({ where: { tripUniqueCode: tripId, isDeleted: false } });
-        console.log(selectedTrip)
+        
         const tripExpenses = await TripExpense.findAll({
             where: {
                 tripId: selectedTrip.id

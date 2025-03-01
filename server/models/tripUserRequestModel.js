@@ -1,7 +1,7 @@
 //to store the data related to requests or user who sends a request to join a trip
 
 module.exports = (sequelize, DataTypes) => {
-    const TripUserRequest = sequelize.define('PreLoggedUser', {
+    const TripUserRequest = sequelize.define('TripUserRequest', {
         id: {
             allowNull: false,
             primaryKey: true,

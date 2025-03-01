@@ -51,20 +51,60 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// db.Connections.belongsTo(db.User, { foreignKey: 'userId', as: 'initiator' }); // User who initiates the connection
-db.Connections.belongsTo(db.User, { foreignKey: 'connectionUserId', as: 'connectedUser' }); // User who is being connected to
+// In your index.js file
+// First, remove the existing associations
+// db.TripUserData.belongsTo(db.User, {foreignKey:"userId", as: "people", constraints: false })
+// db.TripUserData.belongsTo(db.PreLoggedUser, {foreignKey:"userId", as: "plcUser", constraints: false })
+// db.User.hasMany(db.TripUserData, {foreignKey:"userId", sourceKey:'id', as:'people', constraints: false})
+// db.PreLoggedUser.hasMany(db.TripUserData, {foreignKey:"userId", sourceKey:'id', as:'plcUser', constraints: false})
 
-// db.User.hasMany(db.Connections, { foreignKey: 'userId', sourceKey: 'id', as: 'connections' });
-db.User.hasMany(db.Connections, { foreignKey: 'connectionUserId', sourceKey: 'id', as: 'connectedUsers' });
+// Replace with these updated associations
+db.TripUserData.belongsTo(db.User, {
+  foreignKey: {
+    name: "userId",
+    allowNull: true
+  }, 
+  as: "people", 
+  constraints: false 
+});
 
-db.Connections.belongsTo(db.PreLoggedUser, { foreignKey: 'connectionUserId', as: 'preLoggedConnectedUser'}); // User who is being connected to
-// db.User.hasMany(db.Connections, { foreignKey: 'userId', sourceKey: 'id', as: 'connections' });
-db.PreLoggedUser.hasMany(db.Connections, { foreignKey: 'connectionUserId', sourceKey: 'id', as: 'preLoggedConnectedUser' });
-db.TripUserData.belongsTo(db.User, {foreignKey:"userId", as: "people"})
-db.TripUserData.belongsTo(db.PreLoggedUser, {foreignKey:"userId", as: "plcUser"})
-db.User.hasMany(db.TripUserData, {foreignKey:"userId", sourceKey:'id', as:'people'})
+db.TripUserData.belongsTo(db.PreLoggedUser, {
+  foreignKey: {
+    name: "userId",
+    allowNull: true
+  }, 
+  as: "plcUser", 
+  constraints: false 
+});
+
+db.User.hasMany(db.TripUserData, {
+  foreignKey: {
+    name: "userId",
+    allowNull: true
+  }, 
+  sourceKey: 'id', 
+  as: 'people', 
+  constraints: false
+});
+
+db.PreLoggedUser.hasMany(db.TripUserData, {
+  foreignKey: {
+    name: "userId",
+    allowNull: true
+  }, 
+  sourceKey: 'id', 
+  as: 'plcUser', 
+  constraints: false
+});
+
+
+
+
+
+db.TripUserData.belongsTo(db.Trip, {foreignKey: 'tripId', as: 'trip', constraints: false });
 db.Trip.hasMany(db.TripUserData, {foreignKey: 'tripId', as: 'tripUsers' });
-db.TripUserData.belongsTo(db.Trip, {foreignKey: 'tripId', as: 'trip'});
+
+
 
 // ExpenseSplit belongs to Connection
 db.ExpenseSplit.belongsTo(db.Connections, { foreignKey: "connectionId", as: "connection" });
@@ -73,7 +113,7 @@ db.ExpenseSplit.belongsTo(db.Connections, { foreignKey: "connectionId", as: "con
 // db.Connections.belongsTo(db.User, { foreignKey: "connectionUserId", as: "connectedUser" });
 
 // User has many Connections
-db.User.hasMany(db.Connections, {foreignKey: "connectionUserId", as: "connections"});
+// db.User.hasMany(db.Connections, {foreignKey: "connectionUserId", as: "connections"});
 
 
 // ExpenseSplit belongs to Expense
@@ -88,6 +128,40 @@ db.PaymentMethodUser.belongsTo(db.PaymentMethods, { foreignKey: "paymentMethodKe
 // Expense has many ExpenseSplit
 db.PaymentMethods.hasMany(db.PaymentMethodUser, { foreignKey: "paymentMethodKey", sourceKey: "id", as: "paymentMethodDetails" });
 
+// For the Connections associations
+db.Connections.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
+
+// These two associations handle the dual-purpose connectionUserId
+db.Connections.belongsTo(db.User, { 
+  foreignKey: 'connectionUserId', 
+  as: 'connectedUser',
+  constraints: false 
+});
+
+db.Connections.belongsTo(db.PreLoggedUser, { 
+  foreignKey: 'connectionUserId', 
+  as: 'preLoggedConnectedUser',
+  constraints: false 
+});
+
+// For the User model's reverse associations
+db.User.hasMany(db.Connections, { 
+  foreignKey: 'userId', 
+  as: 'connections'
+});
+
+db.User.hasMany(db.Connections, {
+  foreignKey: 'connectionUserId',
+  as: 'connectedToMe',  
+  constraints: false
+});
+
+// For the PreLoggedUser's reverse association
+db.PreLoggedUser.hasMany(db.Connections, {
+  foreignKey: 'connectionUserId',
+  as: 'preLoggedConnectedUser',
+  constraints: false
+});
 
 
 

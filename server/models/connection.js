@@ -1,29 +1,29 @@
 module.exports = (sequelize, DataTypes) => {
     const Connection = sequelize.define('Connections', {
-        connectionId: { //ID of the connection
+        connectionId: {
             allowNull: false,
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-        userId: { //ID of the user who adds the connection
+        userId: {
             type: DataTypes.INTEGER,
-
         },
         isPlcUser: {
             type: DataTypes.BOOLEAN,
+            allowNull: false
         },
-        connectionUserId: { // ID of the user who is being connected to
+        connectionUserId: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: false
         },
-        isBlocked:{
-            type:DataTypes.BOOLEAN,
-            defaultValue:false,
+        isBlocked: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
         },
-        isDeleted:{
-            type:DataTypes.BOOLEAN,
-            defaultValue:false
+        isDeleted: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         },
         createdAt: {
             allowNull: false,
@@ -33,9 +33,30 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.DATE,
         },
+    }, {
+        // hooks: {
+        //     beforeCreate: async (connection, options) => {
+        //         if (connection.isPlcUser) {
+        //             const plcUser = await sequelize.models.PreLoggedUser.findByPk(connection.connectionUserId);
+        //             if (!plcUser) throw new Error('Referenced PLC user not found');
+        //         } else {
+        //             const user = await sequelize.models.User.findByPk(connection.connectionUserId);
+        //             if (!user) throw new Error('Referenced user not found');
+        //         }
+        //     },
+        //     beforeUpdate: async (connection, options) => {
+        //         if (connection.changed('connectionUserId') || connection.changed('isPlcUser')) {
+        //             if (connection.isPlcUser) {
+        //                 const plcUser = await sequelize.models.PreLoggedUser.findByPk(connection.connectionUserId);
+        //                 if (!plcUser) throw new Error('Referenced PLC user not found');
+        //             } else {
+        //                 const user = await sequelize.models.User.findByPk(connection.connectionUserId);
+        //                 if (!user) throw new Error('Referenced user not found');
+        //             }
+        //         }
+        //     }
+        // }
+    });
 
-
-    })
-
-    return Connection
-}
+    return Connection;
+};

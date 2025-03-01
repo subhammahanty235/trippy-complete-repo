@@ -9,6 +9,6 @@ router.get('/livetrip/user' ,verifyToken, getLiveTripOfUser)
 router.post('/request/create', verifyToken, tripJoinRequest)
 router.post('/request/accept/:reqid', verifyToken, acceptTripJoinRequest)
 router.post('/request/reject/:reqid', verifyToken, rejectTripJoinRequest)   
-router.post('/add/user' , verifyToken, addConnectionToTrip)
+router.post('/add/user/:tripId' , verifyToken, addConnectionToTrip)
 router.get('/alltrips', verifyToken, getAllTripsOfUser)
 module.exports = router;

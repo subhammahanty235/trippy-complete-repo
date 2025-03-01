@@ -8,10 +8,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         userId: {
             type: DataTypes.INTEGER,
+            allowNull: true,
         },
         //to handle plc user cases
-        isPlcUser:{
-            type:DataTypes.BOOLEAN
+        isPlcUser: {
+            type: DataTypes.BOOLEAN
         },
         tripId: {
             type: DataTypes.INTEGER,
